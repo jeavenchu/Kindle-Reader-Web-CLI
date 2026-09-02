@@ -13,8 +13,9 @@ from head.aes import aes_decode
 
 # 创建Nocover.png
 def create_img():
-    if not (img_path := Path('storage/assets/img/noCover.jpeg')).exists():
-        shutil.copy(Path('noCover.jpeg'), img_path)
+    img_path = Path("storage/assets/img/noCover.jpeg")
+    img_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(Path("noCover.jpeg"), img_path)
 
 
 # 禁用Windows下的关闭按钮使得关闭程序只能使用Ctrl+C
