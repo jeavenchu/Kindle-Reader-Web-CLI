@@ -13,16 +13,40 @@ from head.server import app
 
 # 创建reader线程
 def reader_thread():
+    import logging
+    import subprocess
+    import sys
+
+    logger = logging.getLogger(__name__)
+
     try:
-        subprocess.check_output([f'{config.java_path}', '-jar', 'reader-pro.jar', '>nul'])
-    except FileNotFoundError:
-        ...
-    try:
-        subprocess.check_output([f'{config.java_path}', '-jar', 'reader-pro.jar', '>nul'])
-    except FileNotFoundError as err:
-        logging.getLogger(__name__).critical(err)
-        logging.getLogger(__name__).critical('Unable to load thread:"reader",please check file or java integrity.')
-        sys.exit()
+        logger.info("Starting Reader Java service...")
+        logger.info(f"Java path: {config.java_path}")
+
+        process = subprocess.Popen(
+            [config.java_path, "-jar", "reader-pro.jar"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+
+        for line in process.stdout:
+            logger.info(f"[Reader] {line.rstrip()}")
+
+        return_code = process.wait()
+
+        logger.error(
+            f"Reader Java service exited with code: {return_code}"
+        )
+
+        sys.exit(return_code)
+
+    except Exception as err:
+        logger.exception(
+            f"Unable to load Reader service: {err}"
+        )
+        sys.exit(1)
 
 
 # 创建flask线程
